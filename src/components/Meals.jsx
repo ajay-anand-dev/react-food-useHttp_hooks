@@ -1,25 +1,28 @@
 import { useEffect, useState } from "react"
 import Meal from "./MealItem";
+import useHttp from "../hooks/useHttp";
+import Error from "./Error";
+
+const requestConfig = {};
 
 export default function Meals() {
-    const [loadedMeals, setLoadedMeals] = useState([]);
+    const {
+        data: loadedMeals,
+        isLoading,
+        error
+    } = useHttp('http://localhost:3000/meals', requestConfig, []);
 
-    useEffect(() => {
-        async function fetchMeals() {
-            try {
-                const response = await fetch('http://localhost:3000/meals')
-                // if (!response.ok) {
+    // } = useHttp('http://localhost:3000/meals', {}, []); // {} if we'll create an empty object here then at every render a new object will be created, otherwise in useHttp it will go to the infinite loop as the config value is getting created again.
 
-                // }
-                const meals = await response.json();
-                setLoadedMeals(meals);
-            } catch (error) {
-                console.log(error)
-            }
-        }
+    // [] initialState, {} for config
 
-        fetchMeals();
-    }, [])
+    if (isLoading) {
+        return <p className="center">Fetching meals...</p>
+    }
+
+    if (error) {
+        return <Error title="Failed to fetch meals" message={error} />
+    }
 
     return (
         <ul id='meals'>
